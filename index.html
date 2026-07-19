@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cube Game</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-box {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        canvas {
+            border: 3px solid #f8fafc;
+            border-radius: 10px;
+            background: #111827;
+        }
+
+        .controls {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        button {
+            margin-top: 12px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #22c55e;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background: #16a34a;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-box">
+        <h2>Cube Collector</h2>
+        <canvas id="gameCanvas" width="480" height="320"></canvas>
+        <div class="controls">Use arrow keys or WASD to move the cube and collect the targets.</div>
+        <button onclick="startGame()">Restart Game</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let player = { x: 40, y: 40, size: 24, speed: 4 };
+        let target = { x: 0, y: 0, size: 18 };
+        let score = 0;
+        let gameOver = false;
+        let keys = {};
+
+        function resetTarget() {
+            target.x = Math.random() * (canvas.width - target.size - 20) + 10;
+            target.y = Math.random() * (canvas.height - target.size - 20) + 10;
+        }
+
+        function startGame() {
+            score = 0;
+            gameOver = false;
+            player.x = 40;
+            player.y = 40;
+            resetTarget();
+        }
+
+        function update() {
+            if (gameOver) return;
+
+            if (keys['ArrowRight'] || keys['d']) player.x += player.speed;
+            if (keys['ArrowLeft'] || keys['a']) player.x -= player.speed;
+            if (keys['ArrowDown'] || keys['s']) player.y += player.speed;
+            if (keys['ArrowUp'] || keys['w']) player.y -= player.speed;
+
+            player.x = Math.max(0, Math.min(canvas.width - player.size, player.x));
+            player.y = Math.max(0, Math.min(canvas.height - player.size, player.y));
+
+            if (
+                player.x < target.x + target.size &&
+                player.x + player.size > target.x &&
+                player.y < target.y + target.size &&
+                player.y + player.size > target.y
+            ) {
+                score++;
+                resetTarget();
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#111827';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillRect(target.x, target.y, target.size, target.size);
+
+            ctx.fillStyle = '#f43f5e';
+            ctx.fillRect(player.x, player.y, player.size, player.size);
+
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = '18px Arial';
+            ctx.fillText('Score: ' + score, 18, 26);
+
+            if (gameOver) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'white';
+                ctx.font = '28px Arial';
+                ctx.fillText('Game Over!', 150, 140);
+                ctx.font = '18px Arial';
+                ctx.fillText('Press Restart to play again', 120, 180);
+            }
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            if (e.key === ' ') {
+                e.preventDefault();
+                startGame();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        startGame();
+        gameLoop();
+    </script>
+</body>
+</html>

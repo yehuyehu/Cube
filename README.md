@@ -1,1 +1,1 @@
-This is just a cube game created using Javascript
+# This is just a cube game created using Javascript
